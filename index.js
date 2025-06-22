@@ -27,6 +27,7 @@ async function run() {
 
     const database = client.db("BangladeshiITDB");
     const usersCollection = database.collection("users");
+    const blogsCollection = database.collection("blogs");
 
     // POST endpoint to save user data (with role)
     app.post("/users", async (req, res) => {
@@ -57,7 +58,7 @@ async function run() {
       res.send({ role: user.role });
     });
 
-     // PATCH endpoint to make a user an admin by ID
+    // PATCH endpoint to make a user an admin by ID
     app.patch("/users/admin/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -66,11 +67,24 @@ async function run() {
       res.send(result);
     });
 
-        // DELETE endpoint to remove a user
+    // DELETE endpoint to remove a user
     app.delete("/users/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // POST - Add a blog
+    app.post("/blogs", async (req, res) => {
+      const blog = req.body;
+      const result = await blogsCollection.insertOne(blog);
+      res.send(result);
+    });
+
+    // GET - Fetch all blogs
+    app.get("/blogs", async (req, res) => {
+      const result = await blogsCollection.find().toArray();
       res.send(result);
     });
 
