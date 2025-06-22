@@ -46,6 +46,26 @@ async function run() {
       res.send(result);
     });
 
+    // Get role by email
+    app.get("/users/role", async (req, res) => {
+      const email = req.query.email;
+      const query = { email };
+      const user = await usersCollection.findOne(query);
+      if (!user) {
+        return res.status(404).send({ role: null, message: "User not found" });
+      }
+      res.send({ role: user.role });
+    });
+
+     // PATCH endpoint to make a user an admin by ID
+    app.patch("/users/admin/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = { $set: { role: "admin" } };
+      const result = await usersCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
