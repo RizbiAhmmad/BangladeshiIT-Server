@@ -29,6 +29,9 @@ async function run() {
     const usersCollection = database.collection("users");
     const blogsCollection = database.collection("blogs");
     const teamCollection = database.collection("team");
+     const reviewsCollection = database.collection("reviews");
+    const reviewVideosCollection = database.collection("reviewVideos");
+
 
     // POST endpoint to save user data (with role)
     app.post("/users", async (req, res) => {
@@ -96,8 +99,6 @@ async function run() {
       res.send(result);
     });
 
-    const reviewsCollection = database.collection("reviews");
-
     // POST Review
     app.post("/reviews", async (req, res) => {
       const review = req.body;
@@ -159,6 +160,20 @@ async function run() {
       const result = await teamCollection.deleteOne(query);
       res.send(result);
     });
+    
+    // POST a Review Video
+    app.post("/review-videos", async (req, res) => {
+      const video = req.body;
+      const result = await reviewVideosCollection.insertOne(video);
+      res.send(result);
+    });
+
+    // GET all Review Videos
+    app.get("/review-videos", async (req, res) => {
+      const result = await reviewVideosCollection.find().toArray();
+      res.send(result);
+    });
+
 
     await client.db("admin").command({ ping: 1 });
     console.log(
