@@ -28,6 +28,7 @@ async function run() {
     const database = client.db("BangladeshiITDB");
     const usersCollection = database.collection("users");
     const blogsCollection = database.collection("blogs");
+    const teamCollection = database.collection("team");
 
     // POST endpoint to save user data (with role)
     app.post("/users", async (req, res) => {
@@ -115,6 +116,19 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await reviewsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // POST Member
+    app.post("/team", async (req, res) => {
+      const member = req.body;
+      const result = await teamCollection.insertOne(member);
+      res.send(result);
+    });
+
+    // GET Members
+    app.get("/team", async (req, res) => {
+      const result = await teamCollection.find().toArray();
       res.send(result);
     });
 
