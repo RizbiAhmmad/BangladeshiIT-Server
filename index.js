@@ -132,6 +132,34 @@ async function run() {
       res.send(result);
     });
 
+    // UPDATE Team Member
+    app.put("/team/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedMember = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          name: updatedMember.name,
+          position: updatedMember.position,
+          image: updatedMember.image,
+          facebook: updatedMember.facebook,
+          github: updatedMember.github,
+          linkedin: updatedMember.linkedin,
+        },
+      };
+
+      const result = await teamCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // DELETE Member
+    app.delete("/team/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await teamCollection.deleteOne(query);
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
