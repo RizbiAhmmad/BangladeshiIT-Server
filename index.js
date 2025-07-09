@@ -19,25 +19,6 @@ const client = new MongoClient(uri, {
   },
 });
 
-const multer = require("multer");
-const path = require("path");
-
-// Serve static files (so uploaded images can be accessed in frontend)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// Storage configuration
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/teamImages"); // Save in this folder
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname)); // e.g., 234923-image.jpg
-  },
-});
-
-const upload = multer({ storage: storage });
-
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -109,6 +90,11 @@ async function run() {
       const result = await blogsCollection.find().toArray();
       res.send(result);
     });
+    app.get("/blogs/:id", async (req, res) => {
+      const id = req.params.id;
+      const blog = await blogsCollection.findOne({ _id: new ObjectId(id) });
+      res.send(blog);
+    });
 
     // DELETE a blog
     app.delete("/blogs/:id", async (req, res) => {
@@ -138,29 +124,29 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/team", upload.single("image"), async (req, res) => {
+    app.post("/team", async (req, res) => {
+      const { name, position, facebook, github, linkedin, email, image } =
+        req.body;
+
+      console.log("📦 Received from frontend (team):", req.body); // check full body
+      console.log("Image field value:", image);
+
+      const memberData = {
+        name,
+        position,
+        facebook,
+        github,
+        linkedin,
+        email,
+        image,
+      };
+
       try {
-        const { name, position, facebook, github, linkedin, email } = req.body;
-
-        const imagePath = req.file
-          ? `/uploads/teamImages/${req.file.filename}`
-          : "";
-
-        const memberData = {
-          name,
-          position,
-          image: imagePath,
-          facebook,
-          github,
-          linkedin,
-          email,
-        };
-
         const result = await teamCollection.insertOne(memberData);
         res.send(result);
-      } catch (error) {
-        console.error("Upload Error:", error);
-        res.status(500).send({ message: "Failed to add member", error });
+      } catch (err) {
+        console.error("❌ Failed to insert member:", err);
+        res.status(500).send({ message: "Failed to add team member" });
       }
     });
 
@@ -170,14 +156,9 @@ async function run() {
       res.send(result);
     });
 
-    app.put("/team/:id", upload.single("image"), async (req, res) => {
+    app.put("/team/:id", async (req, res) => {
       const id = req.params.id;
-      const { name, position, facebook, github, linkedin } = req.body;
-
-      let imagePath = req.body.image; // default: old image path
-      if (req.file) {
-        imagePath = `/uploads/teamImages/${req.file.filename}`; // new image uploaded
-      }
+      const { name, position, facebook, github, linkedin, image } = req.body;
 
       const updateDoc = {
         $set: {
@@ -186,7 +167,7 @@ async function run() {
           facebook,
           github,
           linkedin,
-          image: imagePath,
+          image,
         },
       };
 
