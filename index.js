@@ -31,7 +31,7 @@ async function run() {
     const teamCollection = database.collection("team");
     const reviewsCollection = database.collection("reviews");
     const reviewVideosCollection = database.collection("reviewVideos");
-
+    const clientsCollection = database.collection("clients");
     // POST endpoint to save user data (with role)
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -205,6 +205,18 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await reviewVideosCollection.deleteOne(query);
       res.send(result);
+    });
+
+    // POST endpoint to add a new client
+    app.post("/clients", async (req, res) => {
+      const client = req.body;
+      try {
+        const result = await clientsCollection.insertOne(client);
+        res.send(result);
+      } catch (error) {
+        console.error("Failed to add client:", error);
+        res.status(500).send({ message: "Failed to add client" });
+      }
     });
 
     // await client.db("admin").command({ ping: 1 });
