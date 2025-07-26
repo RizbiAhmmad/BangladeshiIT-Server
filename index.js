@@ -32,6 +32,8 @@ async function run() {
     const reviewsCollection = database.collection("reviews");
     const reviewVideosCollection = database.collection("reviewVideos");
     const clientsCollection = database.collection("clients");
+    const freeCoursesCollection = database.collection("freeCourses");
+
     // POST endpoint to save user data (with role)
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -234,8 +236,28 @@ async function run() {
       res.send(result);
     });
 
+    // POST a free course
+    app.post("/free-courses", async (req, res) => {
+      const course = req.body;
+      const result = await freeCoursesCollection.insertOne(course);
+      res.send(result);
+    });
 
-    
+    // GET all free courses
+    app.get("/free-courses", async (req, res) => {
+      const result = await freeCoursesCollection.find().toArray();
+      res.send(result);
+    });
+
+    // DELETE a free course
+    app.delete("/free-courses/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await freeCoursesCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+      res.send(result);
+    });
+
     // await client.db("admin").command({ ping: 1 });
     // console.log(
     //   "Pinged your deployment. You successfully connected to MongoDB!"
