@@ -33,6 +33,7 @@ async function run() {
     const reviewVideosCollection = database.collection("reviewVideos");
     const clientsCollection = database.collection("clients");
     const freeCoursesCollection = database.collection("freeCourses");
+    const enrollmentsCollection = database.collection("enrollments");
 
     // POST endpoint to save user data (with role)
     app.post("/users", async (req, res) => {
@@ -266,8 +267,6 @@ async function run() {
       res.send(course);
     });
 
-    const enrollmentsCollection = database.collection("enrollments");
-
     app.post("/enrollments", async (req, res) => {
       const enrollment = req.body;
       try {
@@ -276,6 +275,29 @@ async function run() {
       } catch (error) {
         console.error("❌ Enrollment failed:", error);
         res.status(500).send({ message: "Failed to enroll" });
+      }
+    });
+
+    app.get("/enrollments", async (req, res) => {
+      try {
+        const enrollments = await enrollmentsCollection.find().toArray();
+        res.send(enrollments);
+      } catch (error) {
+        console.error("Failed to fetch enrollments:", error);
+        res.status(500).send({ message: "Failed to fetch enrollments" });
+      }
+    });
+
+    app.delete("/enrollments/:id", async (req, res) => {
+      const id = req.params.id;
+      try {
+        const result = await enrollmentsCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        res.send(result);
+      } catch (error) {
+        console.error("Failed to delete enrollment:", error);
+        res.status(500).send({ message: "Failed to delete enrollment" });
       }
     });
 
