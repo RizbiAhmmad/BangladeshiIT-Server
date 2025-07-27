@@ -258,6 +258,27 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/free-courses/:id", async (req, res) => {
+      const id = req.params.id;
+      const course = await freeCoursesCollection.findOne({
+        _id: new ObjectId(id),
+      });
+      res.send(course);
+    });
+
+    const enrollmentsCollection = database.collection("enrollments");
+
+    app.post("/enrollments", async (req, res) => {
+      const enrollment = req.body;
+      try {
+        const result = await enrollmentsCollection.insertOne(enrollment);
+        res.send(result);
+      } catch (error) {
+        console.error("❌ Enrollment failed:", error);
+        res.status(500).send({ message: "Failed to enroll" });
+      }
+    });
+
     // await client.db("admin").command({ ping: 1 });
     // console.log(
     //   "Pinged your deployment. You successfully connected to MongoDB!"
