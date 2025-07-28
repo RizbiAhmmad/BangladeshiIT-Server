@@ -278,16 +278,6 @@ async function run() {
       }
     });
 
-    app.get("/enrollments", async (req, res) => {
-      try {
-        const enrollments = await enrollmentsCollection.find().toArray();
-        res.send(enrollments);
-      } catch (error) {
-        console.error("Failed to fetch enrollments:", error);
-        res.status(500).send({ message: "Failed to fetch enrollments" });
-      }
-    });
-
     app.delete("/enrollments/:id", async (req, res) => {
       const id = req.params.id;
       try {
@@ -298,6 +288,28 @@ async function run() {
       } catch (error) {
         console.error("Failed to delete enrollment:", error);
         res.status(500).send({ message: "Failed to delete enrollment" });
+      }
+    });
+
+    // ✅ For admin — get all enrollments
+    app.get("/enrollments", async (req, res) => {
+      const email = req.query.email;
+
+      try {
+        if (email) {
+          // Get by email (MyEnrollments)
+          const enrollments = await enrollmentsCollection
+            .find({ email })
+            .toArray();
+          res.send(enrollments);
+        } else {
+          // Get all (Admin)
+          const enrollments = await enrollmentsCollection.find().toArray();
+          res.send(enrollments);
+        }
+      } catch (error) {
+        console.error("Failed to fetch enrollments:", error);
+        res.status(500).send({ message: "Failed to fetch enrollments" });
       }
     });
 
